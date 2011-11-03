@@ -1,0 +1,21 @@
+﻿<Window x:Class="BeatDancer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525">
+    <Window.ContextMenu>
+        <ContextMenu x:Name="windowMenu">
+            <MenuItem x:Name="dancerSelectMenu" Header="踊り手選択">
+                <MenuItem x:Name="imageDancerSelect" Header="画像" Click="imageDancerSelect_Click" />
+                <MenuItem x:Name="testDancerSelect" Header="デバッグ用" Click="testDancerSelect_Click" />
+            </MenuItem>
+                    <MenuItem x:Name="dancerConfigMenuItem" Header="踊り手設定" Click="dancerConfigMenuItem_Click" />
+            <Separator />
+            <MenuItem x:Name="exitMenuItem" Header="終了" Click="exitMenuItem_Click" />
+        </ContextMenu>
+    </Window.ContextMenu>
+    
+    <Grid>
+        <Canvas Grid.Column="0" x:Name="canvas">
+        </Canvas>        
+    </Grid>
+</Window>
