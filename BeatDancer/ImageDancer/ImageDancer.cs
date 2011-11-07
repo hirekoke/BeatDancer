@@ -155,7 +155,9 @@ namespace BeatDancer.ImageDancer
             Image img = new Image();
             BitmapImage bmp = new BitmapImage(new Uri(fn, UriKind.Relative));
             img.Source = bmp;
-            img.Width = bmp.Width; img.Height = bmp.Height;
+            img.Stretch = Stretch.Uniform;
+            BitmapSource src = (BitmapSource)img.Source;
+            img.Width = src.PixelWidth; img.Height = src.PixelHeight;
             if (img.Width > _width) _width = img.Width;
             if (img.Height > _height) _height = img.Height;
             img.Tag = Path.GetFileNameWithoutExtension(fn);
