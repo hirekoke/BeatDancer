@@ -24,6 +24,9 @@ namespace BeatDancer
         {
             InitializeComponent();
 
+            _dancerManager = new DancerManager();
+            _dancerManager.CreateMenu(dancerSelectMenu);
+
             CompositionTarget.Rendering += new EventHandler(CompositionTarget_Rendering);
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
 
@@ -43,8 +46,8 @@ namespace BeatDancer
         }
 
         private Capture _cap = null;
-        private DetectManager _dm = null;
-        private Dancer _dancer = null;
+        private DancerManager _dancerManager = null;
+        private BeatManager _beatManager = null;
 
         #region frame rate 関係の変数
         private long _nextTick;
@@ -54,6 +57,8 @@ namespace BeatDancer
         private int _frameCount = 0;
         private double _frameRate;
         private const double _idealFrameRate = 30;
+
+        private long _constBpmBaseTick = 0;
         #endregion
 
 
@@ -74,7 +79,6 @@ namespace BeatDancer
             if (_isWindowDragging && e.LeftButton == MouseButtonState.Pressed)
             {
                 Point p = this.PointToScreen(e.GetPosition(this));
-                Console.WriteLine("mouse move " + p );
                 this.Left += p.X - _prevPoint.X;
                 this.Top += p.Y - _prevPoint.Y;
                 _prevPoint = p;
@@ -87,7 +91,6 @@ namespace BeatDancer
             {
                 _isWindowDragging = true;
                 _prevPoint = this.PointToScreen(e.GetPosition(this));
-                Console.WriteLine("mouse down " + _prevPoint);
             }
         }
         #endregion
@@ -95,6 +98,9 @@ namespace BeatDancer
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            this.Left = Config.Instance.WindowLocation.X;
+            this.Top = Config.Instance.WindowLocation.Y;
+
             this.Closing += new System.ComponentModel.CancelEventHandler(MainWindow_Closing);
 
             /// キャプチャ
@@ -103,28 +109,30 @@ namespace BeatDancer
             {
                 return;
             }
-
             _cap.CapDevice = _cap.Devices[0];
             _cap.CreateGraph();
             _cap.StartCapture();
-            _dm = _cap.Sampler.DetectManagers[0];
-            DataContext = _dm;
+            _beatManager = _cap.Sampler.DetectManagers[0];
+            DataContext = _beatManager;
+
+            /// メニュー
+            captureBpmMenuItem.IsChecked = Config.Instance.UseCapturedBpm;
+            constBpmMenuItem.IsChecked = !Config.Instance.UseCapturedBpm;
+            constBpmValueBox.Text = Config.Instance.ConstBpmValue.ToString();
 
             /// frame rate 初期化
             _currentTick = Environment.TickCount;
             _nextTick = _currentTick;
             _lastCountTick = _currentTick;
             _lastFpsTick = _currentTick;
-
-            /// 踊り手さんスタンバイ
-            _dancer = new ImageDancer("hoge");
-            _dancer.Init(canvas);
+            _constBpmBaseTick = _currentTick;
         }
 
         // 描画更新
         void CompositionTarget_Rendering(object sender, EventArgs e)
         {
             /// 描画が多くなり過ぎないように制御しつつ描画
+            /// 固定BPMの場合それに合わせて描画
 
             _currentTick = Environment.TickCount;
 
@@ -136,9 +144,24 @@ namespace BeatDancer
             }
             else
             {
-                // render
-                if (_dancer == null || _dm == null) return;
-                _dancer.Render(_dm.Bpm, _dm.BeatRatio);
+                if (!_isWindowDragging)
+                {
+                    // render
+                    if (_dancerManager != null && _dancerManager.Dancer != null)
+                    {
+                        if (_beatManager != null && Config.Instance.UseCapturedBpm)
+                        {
+                            _dancerManager.Dancer.Render(_beatManager.Bpm, _beatManager.BeatRatio);
+                        }
+                        else
+                        {
+                            double ratio = (_currentTick - _constBpmBaseTick) * Config.Instance.ConstBpmValue / 60000.0;
+                            ratio = ratio - Math.Truncate(ratio);
+                            if (ratio < 0 || ratio >= 1.0) ratio = 0;
+                            _dancerManager.Dancer.Render(Config.Instance.ConstBpmValue, ratio);
+                        }
+                    }
+                }
 
                 _frameCount++;
                 _lastCountTick = _currentTick;
@@ -151,7 +174,20 @@ namespace BeatDancer
             // frame rate 計算
             if (_currentTick - _lastFpsTick >= 1000)
             {
-                _dancer.RenderBpmGraph(_dm.BpmEnergies);
+                if (!_isWindowDragging)
+                {
+                    if (_dancerManager != null && _dancerManager.Dancer != null)
+                    {
+                        if (_beatManager != null && Config.Instance.UseCapturedBpm)
+                        {
+                            _dancerManager.Dancer.RenderBpmGraph(_beatManager.BpmEnergies);
+                        }
+                        else
+                        {
+                            _dancerManager.Dancer.RenderBpmGraph(new double[] { 0 });
+                        }
+                    }
+                }
 
                 _frameRate = _frameCount * 1000 / (double)(_currentTick - _lastFpsTick);
                 _frameCount = 0;
@@ -162,13 +198,18 @@ namespace BeatDancer
         // 終了処理
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            Config.Instance.WindowLocation = new Point(this.Left, this.Top);
+            Config.Instance.Save();
             _cap.Dispose();
         }
 
 
         void MainWindow_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            dancerConfigMenuItem.IsEnabled = _dancer.HasConfig;
+            if (_dancerManager != null && _dancerManager.Dancer != null)
+                dancerConfigMenuItem.IsEnabled = _dancerManager.Dancer.HasConfig;
+            else
+                dancerConfigMenuItem.IsEnabled = false;
         }
 
         void MainWindow_ContextMenuClosing(object sender, ContextMenuEventArgs e)
@@ -179,25 +220,45 @@ namespace BeatDancer
         // 終了
         private void exitMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            Config.Instance.Save();
             Application.Current.Shutdown();
         }
 
         private void dancerConfigMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            _dancer.Configuration();
+            if (_dancerManager != null && _dancerManager.Dancer != null)
+                _dancerManager.Dancer.Configuration();
         }
 
-        private void imageDancerSelect_Click(object sender, RoutedEventArgs e)
+
+        private void constBpmValueBox_KeyDown(object sender, KeyEventArgs e)
         {
-            _dancer = new ImageDancer("test");
-            _dancer.Init(canvas);
+            string s = constBpmValueBox.Text;
+            double bpm = -1;
+            if (double.TryParse(s, out bpm))
+            {
+                Config.Instance.ConstBpmValue = bpm;
+                _constBpmBaseTick = Environment.TickCount;
+            }
+            else
+            {
+                constBpmValueBox.Text = Config.Instance.ConstBpmValue.ToString();
+            }
         }
 
-        private void testDancerSelect_Click(object sender, RoutedEventArgs e)
+        private void constBpmMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            _dancer = new TestDancer();
-            _dancer.Init(canvas);
+            constBpmMenuItem.IsChecked = true;
+            captureBpmMenuItem.IsChecked = false;
+            Config.Instance.UseCapturedBpm = false;
+            _constBpmBaseTick = Environment.TickCount;
         }
 
+        private void captureBpmMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            captureBpmMenuItem.IsChecked = true;
+            constBpmMenuItem.IsChecked = false;
+            Config.Instance.UseCapturedBpm = true;
+        }
     }
 }

@@ -46,6 +46,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -67,8 +68,10 @@
     <Compile Include="BeatStatus.cs" />
     <Compile Include="Capture.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="ImageDancer.cs" />
-    <Page Include="ImageDancerConfig.xaml">
+    <Compile Include="DancerManager.cs" />
+    <Compile Include="ImageDancer\ImageDancer.cs" />
+    <Compile Include="TestDancer\TestDancer.cs" />
+    <Page Include="ImageDancer\ImageDancerConfigWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -81,9 +84,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Dancer.cs" />
-    <Compile Include="DetectManager.cs" />
-    <Compile Include="ImageDancerConfig.xaml.cs">
-      <DependentUpon>ImageDancerConfig.xaml</DependentUpon>
+    <Compile Include="BeatManager.cs" />
+    <Compile Include="ImageDancer\ImageDancerConfigWindow.xaml.cs">
+      <DependentUpon>ImageDancerConfigWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -120,11 +123,36 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AForge.Math.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="DirectShowLib-2005.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="images\test\00.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\test\05.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\test\10.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\test\15.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\test\20.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\test\25.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\test\30.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\test\35.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Resource Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

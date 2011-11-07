@@ -1,0 +1,45 @@
+﻿<Window x:Class="BeatDancer.ImageDancer.ImageDancerConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="設定" Height="170" Width="361">
+
+    <Window.Resources>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Margin" Value="3" />
+            <Setter Property="Padding" Value="5, 2, 5, 2" />
+        </Style>
+        <Style TargetType="{x:Type CheckBox}">
+            <Setter Property="Margin" Value="3" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <StackPanel Grid.Row="0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0">画像フォルダ</Label>
+                <TextBox Grid.Column="1" x:Name="dirPathBox" Text="{Binding Path=ImageDirPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Grid.Column="2" Click="Path_Click">参照...</Button>
+            </Grid>
+
+            <CheckBox Content="BPM表示" IsChecked="{Binding Path=ShowBpm, Mode=TwoWay}"/>
+
+            <CheckBox Content="BPMグラフ表示" IsChecked="{Binding Path=ShowGraph, Mode=TwoWay}"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Click="OK_Click">OK</Button>
+            <Button Click="Cancel_Click">Cancel</Button>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 namespace BeatDancer
 {
-    class DetectManager : INotifyPropertyChanged
+    class BeatManager : INotifyPropertyChanged
     {
         // ビート検出に使うサンプルの長さ(秒)
         private double _secLen = 5;
@@ -24,9 +24,15 @@ namespace BeatDancer
         // Beat Detection インターバル(キャプチャ回数)
         private const int _detectionInterval = 10;
 
+        // キャプチャオプション
         private CaptureOption _captureOpt = null;
         private DetectStatus _detectOpt = null;
 
+        // 踊り手Managerへのポインタ
+        private DancerManager _dancerManager = null;
+        public DancerManager DancerManager { get { return _dancerManager; } set { _dancerManager = value; } }
+
+        // データ
         private List<double[]> _samples = new List<double[]>();
         private List<BeatStatus> _results = new List<BeatStatus>();
         private BeatStatus _result = null;
@@ -84,7 +90,7 @@ namespace BeatDancer
         }
 
         // 初期化
-        public DetectManager(CaptureOption opt)
+        public BeatManager(CaptureOption opt)
         {
             _captureOpt = opt;
             _detectOpt = new DetectStatus();
@@ -158,7 +164,23 @@ namespace BeatDancer
                 Console.Error.WriteLine("beat detect success");
 
                 // Dancerに合わせてBpmを調整する
-                st.BpmDancer = st.BpmRaw; // あとでちゃんとかく
+                st.BpmDancer = st.BpmRaw;
+                if (_dancerManager != null)
+                {
+                    Dancer dancer = _dancerManager.Dancer;
+                    double minBpm = dancer.MinBpm;
+                    double maxBpm = dancer.MaxBpm;
+                    if (st.BpmDancer > maxBpm)
+                    {
+                        while (st.BpmDancer > maxBpm)
+                            st.BpmDancer /= 2.0;
+                    }
+                    if (st.BpmDancer < minBpm)
+                    {
+                        while (st.BpmDancer < minBpm)
+                            st.BpmDancer *= 2.0;
+                    }
+                }
 
                 // Beatを探す
                 detector.AdjustBeat(features, ref _detectOpt, ref st);
