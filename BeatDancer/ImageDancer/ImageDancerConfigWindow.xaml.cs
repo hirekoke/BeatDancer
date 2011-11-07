@@ -40,7 +40,14 @@ namespace BeatDancer.ImageDancer
             System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
             dlg.Description = "画像を含むフォルダを選択";
             dlg.RootFolder = Environment.SpecialFolder.Desktop;
-            dlg.SelectedPath = ((ImageDancerConfig)DataContext).ImageDirPath;
+            if (string.IsNullOrEmpty(((ImageDancerConfig)DataContext).ImageDirPath))
+            {
+                dlg.SelectedPath = AppDomain.CurrentDomain.BaseDirectory;
+            }
+            else
+            {
+                dlg.SelectedPath = ((ImageDancerConfig)DataContext).ImageDirPath;
+            }
             dlg.ShowNewFolderButton = true;
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {

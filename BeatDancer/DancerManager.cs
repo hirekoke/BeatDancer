@@ -64,6 +64,7 @@ namespace BeatDancer
 
         public void SelectDancer(string typeName)
         {
+            Logger.Instance.Log(LogType.Info, "踊り手選択: " + typeName);
             if (_typeNameTable.ContainsKey(typeName))
             {
                 Config.Instance.DancerTypeName = typeName;

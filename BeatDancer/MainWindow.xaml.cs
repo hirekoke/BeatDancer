@@ -22,6 +22,8 @@ namespace BeatDancer
     {
         public MainWindow()
         {
+            Logger.Instance.Log(LogType.Info, "初期化開始");
+
             InitializeComponent();
 
             _dancerManager = new DancerManager();
@@ -103,6 +105,7 @@ namespace BeatDancer
 
             this.Closing += new System.ComponentModel.CancelEventHandler(MainWindow_Closing);
 
+            Logger.Instance.Log(LogType.Info, "キャプチャ開始");
             /// キャプチャ
             _cap = new Capture();
             if (_cap.Devices.Length == 0)
@@ -221,6 +224,7 @@ namespace BeatDancer
         private void exitMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Config.Instance.Save();
+            Logger.Instance.Dispose();
             Application.Current.Shutdown();
         }
 

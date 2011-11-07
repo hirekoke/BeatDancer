@@ -124,7 +124,11 @@ namespace BeatDancer.ImageDancer
                     }
                 }
             }
-            if (_allNumbers)
+            if (_images.Count <= 0)
+            {
+                _width = 200; _height = 200;
+            }
+            else if (_allNumbers)
             {
                 double min = _imageNumbers[0];
                 double max = _imageNumbers[_imageNumbers.Count - 1];
@@ -139,10 +143,6 @@ namespace BeatDancer.ImageDancer
                         _imageNumbers[i] = (_imageNumbers[i] - min) / (max - min);
                     }
                 }
-            }
-            if (_images.Count <= 0)
-            {
-                _width = 200; _height = 200;
             }
             gimg.Width = _width; gimg.Height = 200;
             rimg.Width = _width; rimg.Height = _height;

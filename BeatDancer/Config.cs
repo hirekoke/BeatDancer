@@ -55,6 +55,7 @@ namespace BeatDancer
                         _instance = read(FilePath);
                     else
                         _instance = new Config();
+                    if (_instance == null) _instance = new Config();
                 }
                 return _instance;
             }
@@ -99,115 +100,126 @@ namespace BeatDancer
 
         private void write(string filePath)
         {
-            #warning 例外処理
-
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.CloseOutput = true;
-            settings.CheckCharacters = true;
-            settings.ConformanceLevel = ConformanceLevel.Document;
-            settings.Encoding = Encoding.UTF8;
-            settings.Indent = true;
-            settings.IndentChars = "\t";
-            settings.NewLineChars = "\r\n";
-
-            using (XmlWriter writer = XmlWriter.Create(filePath, settings))
+            try
             {
-                writer.WriteStartDocument();
-                writer.WriteStartElement("Config");
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.CloseOutput = true;
+                settings.CheckCharacters = true;
+                settings.ConformanceLevel = ConformanceLevel.Document;
+                settings.Encoding = Encoding.UTF8;
+                settings.Indent = true;
+                settings.IndentChars = "\t";
+                settings.NewLineChars = "\r\n";
 
-                writer.WriteStartElement("WindowLocation");
-                writer.WriteElementString("X", WindowLocation.X.ToString());
-                writer.WriteElementString("Y", WindowLocation.Y.ToString());
-                writer.WriteEndElement();
-
-                writer.WriteElementString("UseCapturedBpm", UseCapturedBpm ? "1" : "0");
-                writer.WriteElementString("ConstBpmValue", ConstBpmValue.ToString());
-
-                writer.WriteElementString("DancerTypeName", DancerTypeName);
-
-                writer.WriteStartElement("DancerConfig");
-                foreach (KeyValuePair<string, DancerConfig> dckv in DancerConfigs)
+                using (XmlWriter writer = XmlWriter.Create(filePath, settings))
                 {
-                    writer.WriteStartElement(dckv.Key);
-                    foreach (KeyValuePair<string, string> kv in dckv.Value)
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("Config");
+
+                    writer.WriteStartElement("WindowLocation");
+                    writer.WriteElementString("X", WindowLocation.X.ToString());
+                    writer.WriteElementString("Y", WindowLocation.Y.ToString());
+                    writer.WriteEndElement();
+
+                    writer.WriteElementString("UseCapturedBpm", UseCapturedBpm ? "1" : "0");
+                    writer.WriteElementString("ConstBpmValue", ConstBpmValue.ToString());
+
+                    writer.WriteElementString("DancerTypeName", DancerTypeName);
+
+                    writer.WriteStartElement("DancerConfig");
+                    foreach (KeyValuePair<string, DancerConfig> dckv in DancerConfigs)
                     {
-                        writer.WriteElementString(kv.Key, kv.Value);
+                        writer.WriteStartElement(dckv.Key);
+                        foreach (KeyValuePair<string, string> kv in dckv.Value)
+                        {
+                            writer.WriteElementString(kv.Key, kv.Value);
+                        }
+                        writer.WriteEndElement();
                     }
                     writer.WriteEndElement();
-                }
-                writer.WriteEndElement();
 
-                writer.WriteEndElement();
-                writer.WriteEndDocument();
+                    writer.WriteEndElement();
+                    writer.WriteEndDocument();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Log(LogType.Error, "設定ファイルの書き込みに失敗: " + ex.Message + "\r\n" + ex.StackTrace);
             }
         }
 
         private static Config read(string filePath)
         {
-            #warning 例外処理
-
-            Config c = new Config();
-
-            XmlDocument doc = new XmlDocument();
-            doc.Load(filePath);
-
-            XmlNodeList lst = doc.GetElementsByTagName("Config");
-            if (lst.Count == 0) return c;
-            XmlNode root = lst[0];
-
-            foreach (XmlNode node in root.ChildNodes)
+            try
             {
-                switch (node.Name)
+                Config c = new Config();
+
+                XmlDocument doc = new XmlDocument();
+                doc.Load(filePath);
+
+                XmlNodeList lst = doc.GetElementsByTagName("Config");
+                if (lst.Count == 0) return c;
+                XmlNode root = lst[0];
+
+                foreach (XmlNode node in root.ChildNodes)
                 {
-                    case "WindowLocation":
-                        double wlX = 0; double wlY = 0;
-                        foreach (XmlNode wlNode in node.ChildNodes)
-                        {
-                            switch (wlNode.Name)
+                    switch (node.Name)
+                    {
+                        case "WindowLocation":
+                            double wlX = 0; double wlY = 0;
+                            foreach (XmlNode wlNode in node.ChildNodes)
                             {
-                                case "X":
-                                    if (!double.TryParse(wlNode.InnerText.Trim(), out wlX)) wlX = 0;
-                                    break;
-                                case "Y":
-                                    if (!double.TryParse(wlNode.InnerText.Trim(), out wlY)) wlY = 0;
-                                    break;
+                                switch (wlNode.Name)
+                                {
+                                    case "X":
+                                        if (!double.TryParse(wlNode.InnerText.Trim(), out wlX)) wlX = 0;
+                                        break;
+                                    case "Y":
+                                        if (!double.TryParse(wlNode.InnerText.Trim(), out wlY)) wlY = 0;
+                                        break;
+                                }
                             }
-                        }
-                        c.WindowLocation = new System.Windows.Point(wlX, wlY);
-                        break;
+                            c.WindowLocation = new System.Windows.Point(wlX, wlY);
+                            break;
 
-                    case "UseCapturedBpm":
-                        c.UseCapturedBpm = node.InnerText.Trim() != "0";
-                        break;
+                        case "UseCapturedBpm":
+                            c.UseCapturedBpm = node.InnerText.Trim() != "0";
+                            break;
 
-                    case "ConstBpmValue":
-                        double bpm = 60;
-                        if (!double.TryParse(node.InnerText.Trim(), out bpm)) bpm = 60;
-                        c.ConstBpmValue = bpm;
-                        break;
+                        case "ConstBpmValue":
+                            double bpm = 60;
+                            if (!double.TryParse(node.InnerText.Trim(), out bpm)) bpm = 60;
+                            c.ConstBpmValue = bpm;
+                            break;
 
-                    case "DancerTypeName":
-                        c.DancerTypeName = node.InnerText.Trim();
-                        break;
+                        case "DancerTypeName":
+                            c.DancerTypeName = node.InnerText.Trim();
+                            break;
 
-                    case "DancerConfig":
-                        foreach (XmlNode dcNode in node.ChildNodes)
-                        {
-                            string dancerName = dcNode.Name;
-                            if (c.DancerConfigs.ContainsKey(dancerName)) continue;
-                            DancerConfig dc = new DancerConfig();
-                            foreach (XmlNode dcValues in dcNode.ChildNodes)
+                        case "DancerConfig":
+                            foreach (XmlNode dcNode in node.ChildNodes)
                             {
-                                if(!dc.ContainsKey(dcValues.Name))
-                                    dc.Add(dcValues.Name, dcValues.InnerText.Trim());
+                                string dancerName = dcNode.Name;
+                                if (c.DancerConfigs.ContainsKey(dancerName)) continue;
+                                DancerConfig dc = new DancerConfig();
+                                foreach (XmlNode dcValues in dcNode.ChildNodes)
+                                {
+                                    if (!dc.ContainsKey(dcValues.Name))
+                                        dc.Add(dcValues.Name, dcValues.InnerText.Trim());
+                                }
+                                c.DancerConfigs.Add(dancerName, dc);
                             }
-                            c.DancerConfigs.Add(dancerName, dc);
-                        }
-                        break;
+                            break;
+                    }
                 }
-            }
 
-            return c;
+                return c;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Log(LogType.Error, "設定ファイルの読み込みに失敗: " + ex.Message + "\r\n" + ex.StackTrace);
+                return null;
+            }
         }
     }
 }
