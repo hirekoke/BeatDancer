@@ -13,6 +13,11 @@ namespace BeatDancer.ImageDancer
 {
     class ImageDancerConfig
     {
+        private double _minBpm = 70;
+        public double MinBpm { get { return _minBpm; } set { _minBpm = value; } }
+        private double _maxBpm = 180;
+        public double MaxBpm { get { return _maxBpm; } set { _maxBpm = value; } }
+
         private string _imageDirPath;
         public string ImageDirPath { get { return _imageDirPath; } set { _imageDirPath = value; } }
         private bool _showBpm;
@@ -22,6 +27,8 @@ namespace BeatDancer.ImageDancer
         public ImageDancerConfig Copy()
         {
             ImageDancerConfig ret = new ImageDancerConfig();
+            ret.MinBpm = this.MinBpm;
+            ret.MaxBpm = this.MaxBpm;
             ret.ImageDirPath = this.ImageDirPath;
             ret.ShowBpm = this.ShowBpm;
             ret.ShowGraph = this.ShowGraph;
@@ -38,30 +45,30 @@ namespace BeatDancer.ImageDancer
     ///       順番に使用される
     ///       最後のファイルまで使用される
     /// </summary>
-    class ImageDancer : Dancer
+    class ImageDancer : IDancer
     {
         private const string TYPENAME = "ImageDancer";
         private const string NAME = "画像";
         private static string[] _allowImageTypes = { "bmp", "png", "jpg", "gif" };
 
-        private double _minBpm = 70;
-        private double _maxBpm = 180;
-        public double MinBpm { get { return _minBpm; } set { _minBpm = value; } }
-        public double MaxBpm { get { return _maxBpm; } set { _maxBpm = value; } }
+        public double MinBpm { get { return _config.MinBpm; } set { _config.MinBpm = value; } }
+        public double MaxBpm { get { return _config.MaxBpm; } set { _config.MaxBpm = value; } }
         public bool HasConfig { get { return true; } }
         public string TypeName { get { return TYPENAME; } }
         public string Name { get { return NAME; } }
 
         private double _width = 200;
         private double _height = 200;
+        public double Width { get { return _width; } }
+        public double Height { get { return _height; } }
 
         private DrawingGroup rDg = null;
         private DrawingGroup gDg = null;
 
         private ImageDancerConfig _config = new ImageDancerConfig();
 
-        private List<Image> _images = null;
-        private List<double> _imageNumbers = null;
+        private List<BitmapImage> _bmps = new List<BitmapImage>();
+        private List<double> _imageNumbers = new List<double>();
         private bool _allNumbers = false;
         private Canvas _canvas = null;
 
@@ -69,14 +76,21 @@ namespace BeatDancer.ImageDancer
 
         public ImageDancer()
         {
-            _images = new List<Image>();
-            _imageNumbers = new List<double>();
         }
 
         public void Init(Canvas canvas)
         {
             _canvas = canvas;
-            _images.Clear();
+
+            if (_bmps != null)
+            {
+                for (int i = 0; i < _bmps.Count; i++)
+                {
+                    _bmps[i] = null;
+                }
+            }
+
+            _bmps.Clear();
             _imageNumbers.Clear();
 
             canvas.Children.Clear();
@@ -124,7 +138,7 @@ namespace BeatDancer.ImageDancer
                     }
                 }
             }
-            if (_images.Count <= 0)
+            if (_bmps.Count <= 0)
             {
                 _width = 200; _height = 200;
             }
@@ -152,21 +166,15 @@ namespace BeatDancer.ImageDancer
 
         private void loadImage(string fn, Canvas canvas)
         {
-            Image img = new Image();
             BitmapImage bmp = new BitmapImage(new Uri(fn, UriKind.Relative));
-            img.Source = bmp;
-            img.Stretch = Stretch.Uniform;
-            BitmapSource src = (BitmapSource)img.Source;
-            img.Width = src.PixelWidth; img.Height = src.PixelHeight;
-            if (img.Width > _width) _width = img.Width;
-            if (img.Height > _height) _height = img.Height;
-            img.Tag = Path.GetFileNameWithoutExtension(fn);
+            bmp.Freeze();
 
-            Canvas.SetLeft(img, 0);
-            Canvas.SetTop(img, 0);
-            canvas.Children.Add(img);
+            double w = bmp.PixelWidth; double h = bmp.PixelHeight;
 
-            _images.Add(img);
+            if (w > _width) _width = w;
+            if (h > _height) _height = h;
+
+            _bmps.Add(bmp);
         }
 
         public void Dispose()
@@ -227,7 +235,7 @@ namespace BeatDancer.ImageDancer
                 if (!_render) return;
             }
 
-            if (_images.Count == 0)
+            if (_bmps.Count == 0)
             {
                 using (DrawingContext dc = rDg.Open())
                 {
@@ -259,20 +267,19 @@ namespace BeatDancer.ImageDancer
                 else
                 {
                     // ファイル名が全部番号ではない場合: 均等に割り振る
-                    idx = (int)(ratio * _images.Count);
+                    idx = (int)(ratio * _bmps.Count);
                 }
-                idx = idx < 0 ? 0 : (idx >= _images.Count ? _images.Count - 1 : idx);
-                // 画像表示
-                for (int i = 0; i < _images.Count; i++)
-                {
-                    Image img = _images[i];
-                    img.Visibility = idx == i ? Visibility.Visible : Visibility.Hidden;
-                }
+                idx = idx < 0 ? 0 : (idx >= _bmps.Count ? _bmps.Count - 1 : idx);
 
                 using (DrawingContext dc = rDg.Open())
                 {
                     dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, _width, _height));
+
+                    // BPM表示
                     if (_config.ShowBpm) drawBpm(bpm, dc);
+
+                    // 画像表示
+                    dc.DrawImage(_bmps[idx], new Rect(0, 0, _width, _height));
                 }
             }
         }
@@ -293,6 +300,8 @@ namespace BeatDancer.ImageDancer
                 this.Init(_canvas);
                 Dictionary<string, string> dic = Config.Instance.GetDancerConfig(this.TypeName);
                 this.ConvertToDic(ref dic);
+
+                (App.Current.MainWindow as MainWindow).AdjustWindowPosition();
             }
             lock (this)
             {
@@ -303,9 +312,15 @@ namespace BeatDancer.ImageDancer
         public void ConvertFromDic(ref Dictionary<string, string> dic)
         {
             if (dic.ContainsKey("MinBpm"))
-                double.TryParse(dic["MinBpm"], out _minBpm);
+            {
+                double m = _config.MinBpm;
+                if (double.TryParse(dic["MinBpm"], out m)) _config.MinBpm = m;
+            }
             if (dic.ContainsKey("MaxBpm"))
-                double.TryParse(dic["MaxBpm"], out _maxBpm);
+            {
+                double m = _config.MaxBpm;
+                if (double.TryParse(dic["MaxBpm"], out m)) _config.MaxBpm = m;
+            }
             if (dic.ContainsKey("ImageDirPath"))
                 _config.ImageDirPath = dic["ImageDirPath"];
             if (dic.ContainsKey("ShowBpm"))

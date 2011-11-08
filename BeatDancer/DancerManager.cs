@@ -12,8 +12,8 @@ namespace BeatDancer
         private Dictionary<string, Type> _typeNameTable = null;
         private List<MenuItem> _menuItems = null;
 
-        private Dancer _dancer = null;
-        public Dancer Dancer
+        private IDancer _dancer = null;
+        public IDancer Dancer
         {
             get { return _dancer; }
         }
@@ -30,10 +30,10 @@ namespace BeatDancer
                     {
                         foreach (Type t in m.GetTypes())
                         {
-                            if (t.GetInterface("Dancer") == typeof(Dancer))
+                            if (t.GetInterface("IDancer") == typeof(IDancer))
                             {
                                 object o = Activator.CreateInstance(t);
-                                Dancer d = o as Dancer;
+                                IDancer d = o as IDancer;
                                 _nameTable.Add(d.TypeName, d.Name);
                                 _typeNameTable.Add(d.TypeName, t);
                             }
@@ -77,13 +77,15 @@ namespace BeatDancer
                     _dancer.ConvertToDic(ref dc);
                     _dancer.Dispose();
                 }
-                _dancer = o as Dancer;
+                _dancer = o as IDancer;
                 Canvas c = (App.Current.MainWindow as MainWindow).canvas;
                 Dictionary<string, string> ndc = Config.Instance.GetDancerConfig(_dancer.TypeName);
                 _dancer.ConvertFromDic(ref ndc);
                 _dancer.Init(c);
 
                 Config.Instance.Save();
+
+                (App.Current.MainWindow as MainWindow).AdjustWindowPosition();
 
                 if (_menuItems != null)
                 {

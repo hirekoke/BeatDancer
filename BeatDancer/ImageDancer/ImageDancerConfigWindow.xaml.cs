@@ -21,6 +21,15 @@ namespace BeatDancer.ImageDancer
         public ImageDancerConfigWindow()
         {
             InitializeComponent();
+            this.Loaded += new RoutedEventHandler(ImageDancerConfigWindow_Loaded);
+        }
+
+        void ImageDancerConfigWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            ImageDancerConfig idc = (ImageDancerConfig)DataContext;
+            dirPathBox.Text = idc.ImageDirPath;
+            minBpmBox.Text = idc.MinBpm.ToString();
+            maxBpmBox.Text = idc.MaxBpm.ToString();
         }
 
         private void OK_Click(object sender, RoutedEventArgs e)

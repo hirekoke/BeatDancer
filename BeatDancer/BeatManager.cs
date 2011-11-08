@@ -167,7 +167,7 @@ namespace BeatDancer
                 st.BpmDancer = st.BpmRaw;
                 if (_dancerManager != null)
                 {
-                    Dancer dancer = _dancerManager.Dancer;
+                    IDancer dancer = _dancerManager.Dancer;
                     double minBpm = dancer.MinBpm;
                     double maxBpm = dancer.MaxBpm;
                     if (st.BpmDancer > maxBpm)

@@ -11,7 +11,7 @@ namespace BeatDancer.TestDancer
     /// <summary>
     ///  デバッグ用
     /// </summary>
-    class TestDancer : Dancer
+    class TestDancer : IDancer
     {
         private const string TYPENAME = "TestDancer";
         private const string NAME = "デバッグ用";
@@ -23,6 +23,9 @@ namespace BeatDancer.TestDancer
         public bool HasConfig { get { return true; } }
         public string TypeName { get { return TYPENAME; } }
         public string Name { get { return NAME; } }
+
+        public double Width { get { return 200; } }
+        public double Height { get { return 200; } }
 
         private DrawingGroup rDg = null;
         private DrawingGroup gDg = null;

@@ -31,6 +31,13 @@
                 <TextBox Grid.Column="1" x:Name="dirPathBox" Text="{Binding Path=ImageDirPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <Button Grid.Column="2" Click="Path_Click">参照...</Button>
             </Grid>
+            
+            <StackPanel Orientation="Horizontal">
+                <Label>最小BPM</Label>
+                <TextBox Width="100" x:Name="minBpmBox" TextAlignment="Right" Text="{Binding Path=MinBpm, Mode=TwoWay}"></TextBox>
+                <Label>最大BPM</Label>
+                <TextBox Width="100" x:Name="maxBpmBox" TextAlignment="Right" Text="{Binding Path=MaxBpm, Mode=TwoWay}"></TextBox>
+            </StackPanel>
 
             <CheckBox Content="BPM表示" IsChecked="{Binding Path=ShowBpm, Mode=TwoWay}"/>
 

@@ -6,12 +6,14 @@ using System.Windows.Controls;
 
 namespace BeatDancer
 {
-    interface Dancer : IDisposable
+    interface IDancer : IDisposable
     {
         double MinBpm { get; set; }
         double MaxBpm { get; set; }
         string TypeName { get; }
         string Name { get; }
+        double Width { get; }
+        double Height { get; }
         bool HasConfig { get; }
         void Init(Canvas canvas);
         void Configuration();

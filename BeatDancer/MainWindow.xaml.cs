@@ -63,9 +63,13 @@ namespace BeatDancer
         private long _constBpmBaseTick = 0;
         #endregion
 
+        /// <summary>少なくともこの大きさ分だけは画面上に出ていないといけない限界値</summary>
+        private double _minMargin = 100;
 
         #region Windowドラッグ
+        /// <summary>ドラッグ中か否か</summary>
         private bool _isWindowDragging = false;
+        /// <summary>ドラッグ中の前回の位置</summary>
         private Point _prevPoint = new Point(-1, -1);
         void MainWindow_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -100,6 +104,7 @@ namespace BeatDancer
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            // 位置セット
             this.Left = Config.Instance.WindowLocation.X;
             this.Top = Config.Instance.WindowLocation.Y;
 
@@ -116,12 +121,16 @@ namespace BeatDancer
             _cap.CreateGraph();
             _cap.StartCapture();
             _beatManager = _cap.Sampler.DetectManagers[0];
+            _beatManager.DancerManager = _dancerManager;
             DataContext = _beatManager;
 
             /// メニュー
             captureBpmMenuItem.IsChecked = Config.Instance.UseCapturedBpm;
             constBpmMenuItem.IsChecked = !Config.Instance.UseCapturedBpm;
             constBpmValueBox.Text = Config.Instance.ConstBpmValue.ToString();
+
+            /// 位置調整
+            AdjustWindowPosition();
 
             /// frame rate 初期化
             _currentTick = Environment.TickCount;
@@ -204,6 +213,34 @@ namespace BeatDancer
             Config.Instance.WindowLocation = new Point(this.Left, this.Top);
             Config.Instance.Save();
             _cap.Dispose();
+        }
+
+        public void AdjustWindowPosition()
+        {
+            double dx = this.Left;
+            double dy = this.Top;
+            double dw = this.Width;
+            double dh = this.Height;
+            if (_dancerManager != null && _dancerManager.Dancer != null)
+            {
+                dw = _dancerManager.Dancer.Width;
+                dh = _dancerManager.Dancer.Height;
+            }
+            double x = SystemParameters.VirtualScreenLeft;
+            double y = SystemParameters.VirtualScreenTop;
+            double w = SystemParameters.VirtualScreenWidth;
+            double h = SystemParameters.VirtualScreenHeight;
+
+            if (dx + dw < x + _minMargin)
+                this.Left = x + _minMargin - dw;
+            if (dy + dh < y + _minMargin)
+                this.Top = y + _minMargin - dh;
+            if (this.Left > x + w - _minMargin)
+                this.Left = x + w - _minMargin;
+            if (this.Top > y + h - _minMargin)
+                this.Top = y + h - _minMargin;
+
+            Console.WriteLine("dancer: ({0}, {1}, {2}, {3}), screen: ({4}, {5}, {6}, {7})", dx, dy, dw, dh, x, y, w, h);
         }
 
 
