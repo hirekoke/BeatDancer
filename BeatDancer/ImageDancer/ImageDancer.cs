@@ -116,7 +116,19 @@ namespace BeatDancer.ImageDancer
                 _allNumbers = true;
                 DirectoryInfo di = new DirectoryInfo(_config.ImageDirPath);
                 FileInfo[] fs = di.GetFiles();
-                Array.Sort(fs, (FileInfo fi1, FileInfo fi2) => { return fi1.Name.CompareTo(fi2.Name); });
+                Array.Sort(fs, (FileInfo fi1, FileInfo fi2) =>
+                {
+                    double d1 = -1; double d2 = -1;
+                    if (double.TryParse(Path.GetFileNameWithoutExtension(fi1.Name), out d1) &&
+                        double.TryParse(Path.GetFileNameWithoutExtension(fi2.Name), out d2))
+                    {
+                        return d1.CompareTo(d2);
+                    }
+                    else
+                    {
+                        return fi1.Name.CompareTo(fi2.Name);
+                    }
+                });
 
                 foreach (FileInfo fi in fs)
                 {
@@ -322,6 +334,7 @@ namespace BeatDancer.ImageDancer
                     idx = (int)(ratio * _bmps.Count);
                 }
                 idx = idx < 0 ? 0 : (idx >= _bmps.Count ? _bmps.Count - 1 : idx);
+                if (bpm <= 0) idx = _bmps.Count - 1;
 
                 using (DrawingContext dc = rDg.Open())
                 {
