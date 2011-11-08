@@ -3,6 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="Window.Icon" Value="beatdancer.ico" />
+            </Style>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
