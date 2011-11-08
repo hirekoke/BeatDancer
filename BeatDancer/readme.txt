@@ -40,11 +40,6 @@
     - BeatDancer.exe を起動し、右クリックメニューから画像などを設定
 
   予想される問題点
-    Q. 画面外に出て戻ってこなくなっちゃった！
-    A. 現時点では、設定ファイル
-       <ユーザディレクトリ>\AppData\Roaming\BeatDancer\config.xml の
-　     WindowLocation の値を手で書き換えるしかありません。
-
     Q. Bluetooth ヘッドフォン使ってたら全然音と合わないよ？
     A. できるだけ対応したいですが、今のところは仕様です。
 
