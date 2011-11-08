@@ -71,6 +71,9 @@
     <Compile Include="DancerManager.cs" />
     <Compile Include="ImageDancer\ImageDancer.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="NumericUpDown.xaml.cs">
+      <DependentUpon>NumericUpDown.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TestDancer\TestDancer.cs" />
     <Page Include="ImageDancer\ImageDancerConfigWindow.xaml">
       <SubType>Designer</SubType>
@@ -93,6 +96,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="NumericUpDown.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

@@ -1,7 +1,8 @@
 ﻿<Window x:Class="BeatDancer.ImageDancer.ImageDancerConfigWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="設定" Height="170" Width="361">
+        xmlns:local="clr-namespace:BeatDancer"
+        Title="設定" Height="239" Width="380">
 
     <Window.Resources>
         <Style TargetType="{x:Type Button}">
@@ -11,6 +12,13 @@
         <Style TargetType="{x:Type CheckBox}">
             <Setter Property="Margin" Value="3" />
         </Style>
+        <Style TargetType="{x:Type RadioButton}">
+            <Setter Property="Margin" Value="4, 0, 4, 0" />
+        </Style>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Margin" Value="0, 4, 0, 4" />
+        </Style>
+        <local:EnumMatchToBooleanConverter x:Key="enumConverter" />
     </Window.Resources>
 
     <Grid>
@@ -32,16 +40,38 @@
                 <Button Grid.Column="2" Click="Path_Click">参照...</Button>
             </Grid>
             
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" >
                 <Label>最小BPM</Label>
-                <TextBox Width="100" x:Name="minBpmBox" TextAlignment="Right" Text="{Binding Path=MinBpm, Mode=TwoWay}"></TextBox>
+                <local:NumericUpDown Width="60" Height="24" Mininum="60" Maximum="240" Value="{Binding Path=MinBpm, Mode=TwoWay}" />
+                <Canvas Width="20" />
                 <Label>最大BPM</Label>
-                <TextBox Width="100" x:Name="maxBpmBox" TextAlignment="Right" Text="{Binding Path=MaxBpm, Mode=TwoWay}"></TextBox>
+                <local:NumericUpDown Width="60" Height="24" Mininum="60" Maximum="240" Value="{Binding Path=MaxBpm, Mode=TwoWay}" />
             </StackPanel>
 
             <CheckBox Content="BPM表示" IsChecked="{Binding Path=ShowBpm, Mode=TwoWay}"/>
 
             <CheckBox Content="BPMグラフ表示" IsChecked="{Binding Path=ShowGraph, Mode=TwoWay}"/>
+
+            <Label>BPM・グラフ表示位置</Label>
+            <StackPanel Orientation="Horizontal" Margin="20, 0, 0, 0">
+                <RadioButton GroupName="BpmPosition" 
+                    IsChecked="{Binding Path=BpmPosition, Mode=TwoWay, 
+                    Converter={StaticResource enumConverter}, 
+                    ConverterParameter=LeftTop}">左上</RadioButton>
+                <RadioButton GroupName="BpmPosition"
+                    IsChecked="{Binding Path=BpmPosition, Mode=TwoWay,
+                    Converter={StaticResource enumConverter}, 
+                    ConverterParameter=LeftBottom}">左下</RadioButton>
+                <RadioButton GroupName="BpmPosition"
+                    IsChecked="{Binding Path=BpmPosition, Mode=TwoWay,
+                    Converter={StaticResource enumConverter}, 
+                    ConverterParameter=RightTop}">右上</RadioButton>
+                <RadioButton GroupName="BpmPosition"
+                    IsChecked="{Binding Path=BpmPosition, Mode=TwoWay,
+                    Converter={StaticResource enumConverter}, 
+                    ConverterParameter=RightBottom}">右下</RadioButton>
+            </StackPanel>
+
         </StackPanel>
         
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">

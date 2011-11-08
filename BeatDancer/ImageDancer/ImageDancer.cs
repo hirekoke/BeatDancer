@@ -11,6 +11,14 @@ using System.Xml;
 
 namespace BeatDancer.ImageDancer
 {
+    enum BpmPosition
+    {
+        LeftTop,
+        LeftBottom,
+        RightTop,
+        RightBottom
+    }
+
     class ImageDancerConfig
     {
         private double _minBpm = 70;
@@ -24,6 +32,10 @@ namespace BeatDancer.ImageDancer
         public bool ShowBpm { get { return _showBpm; } set { _showBpm = value; } }
         private bool _showGraph;
         public bool ShowGraph { get { return _showGraph; } set { _showGraph = value; } }
+
+        private BpmPosition _bpmPosition;
+        public BpmPosition BpmPosition { get { return _bpmPosition; } set { _bpmPosition = value; } }
+
         public ImageDancerConfig Copy()
         {
             ImageDancerConfig ret = new ImageDancerConfig();
@@ -32,6 +44,7 @@ namespace BeatDancer.ImageDancer
             ret.ImageDirPath = this.ImageDirPath;
             ret.ShowBpm = this.ShowBpm;
             ret.ShowGraph = this.ShowGraph;
+            ret.BpmPosition = this.BpmPosition;
             return ret;
         }
     }
@@ -97,20 +110,7 @@ namespace BeatDancer.ImageDancer
             canvas.Background = Brushes.Transparent;
             _width = 0; _height = 0;
 
-            gDg = new DrawingGroup();
-            Image gimg = new Image();
-            gimg.Source = new DrawingImage(gDg);
-            Canvas.SetLeft(gimg, 0);
-            Canvas.SetTop(gimg, 0);
-            canvas.Children.Add(gimg);
-
-            rDg = new DrawingGroup();
-            Image rimg = new Image();
-            rimg.Source = new DrawingImage(rDg);
-            Canvas.SetLeft(rimg, 0);
-            Canvas.SetTop(rimg, 0);
-            canvas.Children.Add(rimg);
-
+            #region 画像読み込み
             if (Directory.Exists(_config.ImageDirPath))
             {
                 _allNumbers = true;
@@ -158,8 +158,40 @@ namespace BeatDancer.ImageDancer
                     }
                 }
             }
+            #endregion
+
+            gDg = new DrawingGroup();
+            Image gimg = new Image();
             gimg.Width = _width; gimg.Height = 200;
+            gimg.Source = new DrawingImage(gDg);
+            switch (_config.BpmPosition)
+            {
+                case BpmPosition.LeftTop:
+                    Canvas.SetLeft(gimg, 0);
+                    Canvas.SetTop(gimg, 0);
+                    break;
+                case BpmPosition.LeftBottom:
+                    Canvas.SetLeft(gimg, 0);
+                    Canvas.SetBottom(gimg, 0);
+                    break;
+                case BpmPosition.RightTop:
+                    Canvas.SetRight(gimg, 0);
+                    Canvas.SetTop(gimg, 0);
+                    break;
+                case BpmPosition.RightBottom:
+                    Canvas.SetRight(gimg, 0);
+                    Canvas.SetBottom(gimg, 0);
+                    break;
+            }
+            canvas.Children.Add(gimg);
+
+            rDg = new DrawingGroup();
+            Image rimg = new Image();
             rimg.Width = _width; rimg.Height = _height;
+            rimg.Source = new DrawingImage(rDg);
+            Canvas.SetLeft(rimg, 0);
+            Canvas.SetTop(rimg, 0);
+            canvas.Children.Add(rimg);
 
             RenderBpmGraph(new double[0]);
         }
@@ -222,7 +254,27 @@ namespace BeatDancer.ImageDancer
             FormattedText text = new FormattedText(
                 bpm.ToString(), System.Globalization.CultureInfo.CurrentCulture,
                 FlowDirection.LeftToRight, new Typeface("Consolas"), 32, Brushes.Blue);
-            Geometry g = text.BuildGeometry(new Point(10, 10));
+            double tw = text.MinWidth;
+            double th = text.Height;
+            double m = 10;
+
+            Point p = new Point(0, 0);
+            switch (_config.BpmPosition)
+            {
+                case BpmPosition.LeftTop:
+                    p.X = m; p.Y = m;
+                    break;
+                case BpmPosition.LeftBottom:
+                    p.X = m; p.Y = _height - th - m;
+                    break;
+                case BpmPosition.RightTop:
+                    p.X = _width - tw - m; p.Y = m;
+                    break;
+                case BpmPosition.RightBottom:
+                    p.X = _width - tw - m; p.Y = _height - th - m;
+                    break;
+            }
+            Geometry g = text.BuildGeometry(p);
             PathGeometry pg = g.GetOutlinedPathGeometry();
             dc.DrawGeometry(Brushes.Blue, new Pen(Brushes.White, 4), g);
             dc.DrawGeometry(Brushes.Blue, null, g);
@@ -327,6 +379,13 @@ namespace BeatDancer.ImageDancer
                 _config.ShowBpm = dic["ShowBpm"] != "0";
             if (dic.ContainsKey("ShowGraph"))
                 _config.ShowGraph = dic["ShowGraph"] != "0";
+            if (dic.ContainsKey("BpmPosition"))
+            {
+                BpmPosition pos = BpmPosition.LeftTop;
+                if (Enum.TryParse<BpmPosition>(dic["BpmPosition"], out pos))
+                    _config.BpmPosition = pos;
+
+            }
         }
 
         public void ConvertToDic(ref Dictionary<string, string> dic)
@@ -337,6 +396,8 @@ namespace BeatDancer.ImageDancer
             addDic(ref dic, "ImageDirPath", _config.ImageDirPath);
             addDic(ref dic, "ShowBpm", _config.ShowBpm ? "1" : "0");
             addDic(ref dic, "ShowGraph", _config.ShowGraph ? "1" : "0");
+
+            addDic(ref dic, "BpmPosition", _config.BpmPosition.ToString());
         }
         private void addDic(ref Dictionary<string, string> dic, string key, string value)
         {

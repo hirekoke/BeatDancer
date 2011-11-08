@@ -225,6 +225,8 @@ namespace BeatDancer
             {
                 dw = _dancerManager.Dancer.Width;
                 dh = _dancerManager.Dancer.Height;
+                this.Width = dw;
+                this.Height = dh;
             }
             double x = SystemParameters.VirtualScreenLeft;
             double y = SystemParameters.VirtualScreenTop;

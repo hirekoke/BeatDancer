@@ -28,12 +28,18 @@ namespace BeatDancer.ImageDancer
         {
             ImageDancerConfig idc = (ImageDancerConfig)DataContext;
             dirPathBox.Text = idc.ImageDirPath;
-            minBpmBox.Text = idc.MinBpm.ToString();
-            maxBpmBox.Text = idc.MaxBpm.ToString();
         }
 
         private void OK_Click(object sender, RoutedEventArgs e)
         {
+            ImageDancerConfig idc = (ImageDancerConfig)DataContext;
+            if (idc.MinBpm > idc.MaxBpm)
+            {
+                double x = idc.MinBpm;
+                idc.MinBpm = idc.MaxBpm;
+                idc.MaxBpm = x;
+            }
+
             DialogResult = true;
             this.Close();
         }
