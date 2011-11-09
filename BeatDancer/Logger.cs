@@ -47,7 +47,7 @@ namespace BeatDancer
         {
             try
             {
-                _writer = new StreamWriter(FilePath, true, Encoding.UTF8);
+                _writer = new StreamWriter(FilePath, false, Encoding.UTF8);
                 _writer.WriteLine("==== 起動 =========================================================");
                 _writer.WriteLine("  " + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff"));
                 _writer.WriteLine("===================================================================");
@@ -62,6 +62,9 @@ namespace BeatDancer
         {
             if (_writer != null)
             {
+                _writer.WriteLine("==== 終了 =========================================================");
+                _writer.WriteLine("  " + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff"));
+                _writer.WriteLine("===================================================================");
                 _writer.Flush();
                 _writer.Close();
             }

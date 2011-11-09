@@ -129,8 +129,9 @@ namespace BeatDancer
             constBpmMenuItem.IsChecked = !Config.Instance.UseCapturedBpm;
             constBpmValueBox.Text = Config.Instance.ConstBpmValue.ToString();
 
-            /// 位置調整
+            /// 表示設定反映
             AdjustWindowPosition();
+            this.Topmost = Config.Instance.TopMost;
 
             /// frame rate 初期化
             _currentTick = Environment.TickCount;
@@ -258,6 +259,7 @@ namespace BeatDancer
         {
         }
 
+        #region メニュー操作
 
         // 終了
         private void exitMenuItem_Click(object sender, RoutedEventArgs e)
@@ -267,13 +269,18 @@ namespace BeatDancer
             Application.Current.Shutdown();
         }
 
+        // 踊り手設定
         private void dancerConfigMenuItem_Click(object sender, RoutedEventArgs e)
         {
             if (_dancerManager != null && _dancerManager.Dancer != null)
+            {
+                this.Topmost = false;
                 _dancerManager.Dancer.Configuration();
+                this.Topmost = Config.Instance.TopMost;
+            }
         }
 
-
+        // BPM固定値入力
         private void constBpmValueBox_KeyDown(object sender, KeyEventArgs e)
         {
             string s = constBpmValueBox.Text;
@@ -289,6 +296,7 @@ namespace BeatDancer
             }
         }
 
+        // BPM固定値使用
         private void constBpmMenuItem_Click(object sender, RoutedEventArgs e)
         {
             constBpmMenuItem.IsChecked = true;
@@ -297,11 +305,21 @@ namespace BeatDancer
             _constBpmBaseTick = Environment.TickCount;
         }
 
+        // BPMキャプチャ値使用
         private void captureBpmMenuItem_Click(object sender, RoutedEventArgs e)
         {
             captureBpmMenuItem.IsChecked = true;
             constBpmMenuItem.IsChecked = false;
             Config.Instance.UseCapturedBpm = true;
         }
+
+        // 最前面表示
+        private void viewTopMostMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.Topmost = viewTopMostMenuItem.IsChecked;
+            Config.Instance.TopMost = viewTopMostMenuItem.IsChecked;
+        }
+
+        #endregion
     }
 }

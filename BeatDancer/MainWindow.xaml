@@ -4,6 +4,7 @@
         Title="MainWindow">
     <Window.ContextMenu>
         <ContextMenu x:Name="windowMenu">
+            <MenuItem x:Name="viewTopMostMenuItem" IsCheckable="True" Header="最前面表示" Click="viewTopMostMenuItem_Click" />
             <MenuItem Header="BPM">
                 <MenuItem x:Name="captureBpmMenuItem" IsCheckable="True" Header="キャプチャ値使用" Click="captureBpmMenuItem_Click" />
                 <MenuItem x:Name="constBpmMenuItem" IsCheckable="True" Header="固定値使用" Click="constBpmMenuItem_Click" />

@@ -26,15 +26,18 @@ namespace BeatDancer.ImageDancer
         private double _maxBpm = 180;
         public double MaxBpm { get { return _maxBpm; } set { _maxBpm = value; } }
 
-        private string _imageDirPath;
+        private string _imageDirPath = "";
         public string ImageDirPath { get { return _imageDirPath; } set { _imageDirPath = value; } }
-        private bool _showBpm;
+        private bool _showBpm = false;
         public bool ShowBpm { get { return _showBpm; } set { _showBpm = value; } }
-        private bool _showGraph;
+        private bool _showGraph = false;
         public bool ShowGraph { get { return _showGraph; } set { _showGraph = value; } }
 
-        private BpmPosition _bpmPosition;
+        private BpmPosition _bpmPosition = BpmPosition.LeftTop;
         public BpmPosition BpmPosition { get { return _bpmPosition; } set { _bpmPosition = value; } }
+
+        private double _scale = 0.8;
+        public double Scale { get { return _scale; } set { _scale = value; } }
 
         public ImageDancerConfig Copy()
         {
@@ -45,6 +48,7 @@ namespace BeatDancer.ImageDancer
             ret.ShowBpm = this.ShowBpm;
             ret.ShowGraph = this.ShowGraph;
             ret.BpmPosition = this.BpmPosition;
+            ret.Scale = this.Scale;
             return ret;
         }
     }
@@ -156,6 +160,8 @@ namespace BeatDancer.ImageDancer
             }
             else if (_allNumbers)
             {
+                _width *= _config.Scale; _height *= _config.Scale;
+                
                 double min = _imageNumbers[0];
                 double max = _imageNumbers[_imageNumbers.Count - 1];
                 if (max - min <= 0)
@@ -397,7 +403,11 @@ namespace BeatDancer.ImageDancer
                 BpmPosition pos = BpmPosition.LeftTop;
                 if (Enum.TryParse<BpmPosition>(dic["BpmPosition"], out pos))
                     _config.BpmPosition = pos;
-
+            }
+            if (dic.ContainsKey("Scale"))
+            {
+                double s = _config.Scale;
+                if (double.TryParse(dic["Scale"], out s)) _config.Scale = s;
             }
         }
 
@@ -411,6 +421,8 @@ namespace BeatDancer.ImageDancer
             addDic(ref dic, "ShowGraph", _config.ShowGraph ? "1" : "0");
 
             addDic(ref dic, "BpmPosition", _config.BpmPosition.ToString());
+
+            addDic(ref dic, "Scale", _config.Scale.ToString());
         }
         private void addDic(ref Dictionary<string, string> dic, string key, string value)
         {

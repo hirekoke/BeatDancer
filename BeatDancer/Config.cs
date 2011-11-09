@@ -17,6 +17,9 @@ namespace BeatDancer
             set { _windowLocation = value; }
         }
 
+        private bool _topMost = false;
+        public bool TopMost { get { return _topMost; } set { _topMost = value; } }
+
         private bool _useCapturedBpm = true;
         public bool UseCapturedBpm
         {
@@ -121,6 +124,8 @@ namespace BeatDancer
                     writer.WriteElementString("Y", WindowLocation.Y.ToString());
                     writer.WriteEndElement();
 
+                    writer.WriteElementString("TopMost", TopMost ? "1" : "0");
+
                     writer.WriteElementString("UseCapturedBpm", UseCapturedBpm ? "1" : "0");
                     writer.WriteElementString("ConstBpmValue", ConstBpmValue.ToString());
 
@@ -180,6 +185,10 @@ namespace BeatDancer
                                 }
                             }
                             c.WindowLocation = new System.Windows.Point(wlX, wlY);
+                            break;
+
+                        case "TopMost":
+                            c.TopMost = node.InnerText.Trim() != "0";
                             break;
 
                         case "UseCapturedBpm":
