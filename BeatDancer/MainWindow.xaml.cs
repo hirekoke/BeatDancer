@@ -120,7 +120,7 @@ namespace BeatDancer
             _cap.CapDevice = _cap.Devices[0];
             _cap.CreateGraph();
             _cap.StartCapture();
-            _beatManager = _cap.Sampler.DetectManagers[0];
+            _beatManager = _cap.Sampler.DetectManagers[_cap.Sampler.DetectManagers.Count - 1]; /// 最後のDetectManagerには各チャンネルの平均が入っている
             _beatManager.DancerManager = _dancerManager;
             DataContext = _beatManager;
 

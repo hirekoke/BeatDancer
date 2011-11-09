@@ -221,7 +221,7 @@ namespace BeatDancer
             _captureOpt = opt;
             double samplePerSec = opt.SamplePerSec / (double)_sampleStep;
             opt.SamplePerSec = samplePerSec;
-            for (int i = 0; i < opt.ChannelNum; i++)
+            for (int i = 0; i < opt.ChannelNum + 1; i++)
             {
                 BeatManager dm = new BeatManager(opt);
                 _detectManagers.Add(dm);
@@ -238,11 +238,14 @@ namespace BeatDancer
             long startTick = (long)(Environment.TickCount - SampleTime * 1000);
 
             double[][] channels = new double[_captureOpt.ChannelNum][];
+            double cdiv = 1 / (double)(_captureOpt.ChannelNum <= 0 ? 1 : _captureOpt.ChannelNum);
 
             for (int c = 0; c < _captureOpt.ChannelNum; c++)
             {
                 channels[c] = new double[channelLen];
             }
+
+            double[] channelSum = new double[channelLen];
 
             int channel = 0;
             int i = 0; int step = 0;
@@ -251,6 +254,7 @@ namespace BeatDancer
                 if (step == 0)
                 {
                     channels[channel][i] = (double)(s / 32768.0);
+                    channelSum[i] += channels[channel][i] * cdiv;
                 }
                 channel = (channel + 1) % channels.Length;
 
@@ -261,10 +265,12 @@ namespace BeatDancer
                 if (channel == 0 && step == 0) i++;
             }
 
-            for (int c = 0; c < _captureOpt.ChannelNum; c++)
-            {
-                _detectManagers[c].AddSample(startTick, channels[c]);
-            }
+            // 重いので平均以外のチャンネルは動作させない
+            //for (int c = 0; c < _captureOpt.ChannelNum; c++)
+            //{
+            //    _detectManagers[c].AddSample(startTick, channels[c]);
+            //}
+            _detectManagers[_captureOpt.ChannelNum].AddSample(startTick, channelSum);
 
             return 0;
         }
