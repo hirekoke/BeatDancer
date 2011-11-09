@@ -73,15 +73,24 @@
             </StackPanel>
             
             <Label>表示拡大比率</Label>
-            <Slider Margin="20, 0, 3, 5" 
-                    TickPlacement="BottomRight"
+            <Grid Margin="20, 0, 3, 5" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0">0.2</Label>
+                <Slider Grid.Column="1"
+                    TickPlacement="Both"
                     AutoToolTipPlacement="TopLeft"
                     AutoToolTipPrecision="2"
                     IsSnapToTickEnabled="True"
-                    Minimum="0.25" Maximum="1.5" TickFrequency="0.05"
-                    SmallChange="0.05" LargeChange="0.2"
-                    Value="{Binding Path=Scale, Mode=TwoWay}"></Slider>
-
+                    Minimum="0.2" Maximum="1.5" TickFrequency="0.1"
+                    SmallChange="0.1" LargeChange="0.2"
+                    Value="{Binding Path=Scale, Mode=TwoWay}" />
+                <Label Grid.Column="2">1.5</Label>
+            </Grid>
         </StackPanel>
         
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
