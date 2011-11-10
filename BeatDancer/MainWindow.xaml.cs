@@ -244,7 +244,7 @@ namespace BeatDancer
             if (this.Top > y + h - _minMargin)
                 this.Top = y + h - _minMargin;
 
-            Console.WriteLine("dancer: ({0}, {1}, {2}, {3}), screen: ({4}, {5}, {6}, {7})", dx, dy, dw, dh, x, y, w, h);
+            //Console.WriteLine("dancer: ({0}, {1}, {2}, {3}), screen: ({4}, {5}, {6}, {7})", dx, dy, dw, dh, x, y, w, h);
         }
 
 

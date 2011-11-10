@@ -96,7 +96,7 @@ namespace BeatDancer
             return ret;
         }
 
-        /// <summary>ハン窓で畳み込みをして扱う信号を限定する</summary>
+        /// <summary>ハン窓を適用して扱う信号を限定する</summary>
         private List<Complex[]> hwindow(List<Complex[]> sigs, double winLength)
         {
             int n = sigs[0].Length;
@@ -104,6 +104,7 @@ namespace BeatDancer
 
             /// Create half-Hanning window
             int hannLen = (int)Math.Floor(winLength * 2 * _maxFreq);
+
             Complex[] hann = new Complex[n];
             for (int i = 0; i < hannLen; i++)
             {
@@ -116,13 +117,13 @@ namespace BeatDancer
             {
                 FourierTransform.FFT(sigs[i], FourierTransform.Direction.Backward);
 
+                /// Full-wave rectification in the time domain
                 Complex[] tmp = new Complex[sigs[i].Length];
                 Complex[] reals = Array.ConvertAll<Complex, Complex>(sigs[i],
                     complex => (new Complex(complex.Re >= 0 ? complex.Re : -complex.Re, 0)));
                 Array.Copy(reals, tmp, reals.Length);
                 wave.Add(tmp);
 
-                /// Full-wave rectification in the time domain
                 /// And back to frequency with FFT
                 FourierTransform.FFT(wave[i], FourierTransform.Direction.Forward);
             }
@@ -149,7 +150,7 @@ namespace BeatDancer
             return ret;
         }
 
-        /// <summary>信号の差分を取って増加方向の場合のみを残す</summary>
+        /// <summary>エンベロープを得る(差分を取る)、増加分のみ</summary>
         private List<Complex[]> diffrect(List<Complex[]> sig)
         {
             int nbands = _bandLimits.Length;
