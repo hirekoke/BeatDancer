@@ -128,6 +128,7 @@ namespace BeatDancer
             captureBpmMenuItem.IsChecked = Config.Instance.UseCapturedBpm;
             constBpmMenuItem.IsChecked = !Config.Instance.UseCapturedBpm;
             constBpmValueBox.Text = Config.Instance.ConstBpmValue.ToString();
+            viewTopMostMenuItem.IsChecked = Config.Instance.TopMost;
 
             /// 表示設定反映
             AdjustWindowPosition();
