@@ -270,7 +270,7 @@ namespace BeatDancer.ImageDancer
         private void drawBpm(double bpm, DrawingContext dc)
         {
             FormattedText text = new FormattedText(
-                bpm.ToString(), System.Globalization.CultureInfo.CurrentCulture,
+                bpm.ToString("F1"), System.Globalization.CultureInfo.CurrentCulture,
                 FlowDirection.LeftToRight, new Typeface("Consolas"), 32, Brushes.Blue);
             double tw = text.MinWidth;
             double th = text.Height;

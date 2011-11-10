@@ -11,7 +11,8 @@ namespace BeatDancer
     /// </summary>
     class BeatDetector
     {
-        private static double[] _bandLimits = { 0, 200, 400, 800, 1600, 3200 };
+        private static double[] _bandLimits =  {   0, 200, 400, 800, 1600, 3200 };
+        private static double[] _bandWeights = { 1.5, 1.2, 1.0, 1.0, 1.2, 1.5 };
         private const double _maxFreq = 4096;
 
         /// number of pulses in the comb filter
@@ -47,7 +48,7 @@ namespace BeatDancer
             double rBpm = timeCombRough(dft, ref ds);
 
             int maxBand = -1;
-            double b2 = timeComb(dft, 0.5, rBpm - 1, rBpm + 1, ds.SamplePerSec, ref maxBand);
+            double b2 = timeComb(dft, 0.1, rBpm - 1, rBpm + 1, ds.SamplePerSec, ref maxBand);
             bs.BpmRaw = b2;
 
             List<double[]> features = new List<double[]>();
@@ -228,7 +229,7 @@ namespace BeatDancer
                         Complex c = fil[j] * dft[i][j];
                         sum += Math.Pow(c.Re, 2) + Math.Pow(c.Im, 2);
                     }
-                    e += sum * ((i == 0 || i == nbands-1 || i == nbands - 2) ? 1.2 : 1.0);
+                    e += sum * _bandWeights[i];
                 }
 
                 /// Set the energy to DetectStatus
@@ -291,7 +292,7 @@ namespace BeatDancer
                         mb = i;
                         m = sum;
                     }
-                    e += sum * ((i == 0 || i == nbands - 1 || i == nbands - 2) ? 1.2 : 1.0);
+                    e += sum * _bandWeights[i];
                 }
 
                 /// If greater than all previous energies, 
@@ -319,12 +320,12 @@ namespace BeatDancer
             {
                 double e = 0;
 
-                for (int i = 0; i < features.Count; i++)
+                for (int i = 0; i < _bandLimits.Length; i++)
                 {
                     for (int j = 0; j < features[i].Length; j++)
                     {
                         double peakValue = 1 - (j % (s + nstep)) / (double)nstep;
-                        e += Math.Pow(features[i][j] * peakValue, 2);
+                        e += Math.Pow(features[i][j] * peakValue, 2) * _bandWeights[i];
                     }
                 }
                 if (maxe < e)
