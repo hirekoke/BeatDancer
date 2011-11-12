@@ -71,7 +71,7 @@ namespace BeatDancer.TestDancer
 
             using (DrawingContext dc = gDg.Open())
             {
-                dc.DrawRectangle(new SolidColorBrush(Color.FromArgb(128, 255, 255, 255)),
+                dc.DrawRectangle(new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
                     null, new Rect(0, 0, 200, 200));
                 if (e > 0)
                 {
@@ -82,7 +82,7 @@ namespace BeatDancer.TestDancer
                         double x1 = (200 / (double)energies.Length) * i;
                         double y1 = 200 - (energies[i] - mine) * 200 / e;
 
-                        dc.DrawLine(new Pen(Brushes.Black, 1.0), new Point(x0, y0), new Point(x1, y1));
+                        dc.DrawLine(new Pen(new SolidColorBrush(Color.FromArgb(128, 255, 255, 255)), 1.0), new Point(x0, y0), new Point(x1, y1));
                     }
                 }
             }
@@ -93,14 +93,18 @@ namespace BeatDancer.TestDancer
             using (DrawingContext dc = rDg.Open())
             {
                 dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, 200, 200));
-                dc.DrawRectangle(Brushes.Red, null,
+                dc.DrawRectangle(Brushes.White, null,
                     new Rect(180 * (ratio <= 0.5 ? ratio : 1.0 - ratio) * 2,
                         200 / 2.0 - 10, 20, 20));
 
                 FormattedText text = new FormattedText(
-                    bpm.ToString(), System.Globalization.CultureInfo.CurrentCulture,
+                    bpm.ToString("F1"), System.Globalization.CultureInfo.CurrentCulture,
                     FlowDirection.LeftToRight, new Typeface("Consolas"), 32, Brushes.Blue);
-                dc.DrawText(text, new Point(10, 10));
+                Point p = new Point(10, 10);
+                Geometry g = text.BuildGeometry(p);
+                PathGeometry pg = g.GetOutlinedPathGeometry();
+                dc.DrawGeometry(Brushes.Blue, new Pen(Brushes.White, 4), g);
+                dc.DrawGeometry(Brushes.Blue, null, g);
             }
         }
 
