@@ -74,8 +74,6 @@ namespace BeatDancer
                 {
                     // 接続されているデバイスリスト取得
                     _devices = DsDevice.GetDevicesOfCat(FilterCategory.AudioInputDevice);
-                    DsDevice[] test = DsDevice.GetDevicesOfCat(FilterCategory.AudioRendererCategory);
-                    test = DsDevice.GetDevicesOfCat(FilterCategory.KSAudioDevice);
                 }
                 return _devices;
             }
